@@ -1,0 +1,115 @@
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Board {
+  id             String      @id @default(uuid())
+  title          String
+  organizationId String
+  boardImage     BoardImage?
+  lists          List[]
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+}
+
+model BoardImage {
+  id       String @id @default(uuid())
+  imageId  String @unique
+  thumbUrl String @db.Text
+  fullUrl  String @db.Text
+  linkHtml String @db.Text
+  userName String @db.Text
+  boardId  String @unique
+  board    Board? @relation(fields: [boardId], references: [id], onDelete: Cascade)
+}
+
+model List {
+  id        String   @id @default(uuid())
+  title     String
+  order     Int
+  cards     Card[]
+  boardId   String
+  board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([boardId])
+}
+
+model Card {
+  id          String   @id @default(uuid())
+  title       String
+  description String?  @db.Text
+  order       Int
+  listId      String
+  list        List     @relation(fields: [listId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([listId])
+}
+
+enum ActionType {
+  CREATE
+  UPDATE
+  DELETE
+}
+
+enum ObjectType {
+  BOARD
+  LIST
+  CARD
+}
+
+model User {
+  id       String     @id @default(uuid())
+  email    String     @unique
+  name     String
+  pfpUrl   String
+  auditLog AuditLog[]
+
+  @@index([email])
+}
+
+model AuditLog {
+  id                String     @id @default(uuid())
+  actionType        ActionType
+  objectId          String
+  objectType        ObjectType
+  objectName        String
+  organizationId    String
+  userId            String
+  user              User       @relation(fields: [userId], references: [id])
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+model OrgLimit {
+  id             String   @id @default(uuid())
+  organizationId String   @unique
+  count          Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([organizationId])
+}
+
+model OrgSubscription {
+  id             String   @id @default(uuid())
+  organizationId String   @unique
+  
+  stripeCustomerId String? @unique @map("stripe_customer_id")
+  stripeSubscriptionId String? @unique @map("stripe_subscription_id")
+  stripePriceId String? @unique @map("stripe_price_id")
+  stripeCurrentPeriodEnd DateTime? @map("stripe_current_period_end")
+
+  @@index([organizationId])
+}
