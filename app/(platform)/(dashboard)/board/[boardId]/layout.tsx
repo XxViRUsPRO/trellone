@@ -63,11 +63,8 @@ const BoardIdLayout = async ({ children, params: { boardId } }: Props) => {
   return (
     <div
       className="relative h-full bg-no-repeat bg-cover bg-center"
-      // style={{
-      //   backgroundImage: `url(${board.boardImage?.fullUrl})`,
-      // }}
       style={{
-        backgroundImage: `url(${board.boardImage?.thumbUrl})`,
+        backgroundImage: `url(${board.boardImage?.fullUrl})`,
       }}
     >
       <BoardNavbar data={board} />
