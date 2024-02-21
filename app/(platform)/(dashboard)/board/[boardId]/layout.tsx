@@ -49,8 +49,7 @@ const BoardIdLayout = async ({ children, params: { boardId } }: Props) => {
     include: {
       boardImage: {
         select: {
-          // fullUrl: true,
-          thumbUrl: true,
+          fullUrl: true,
         },
       },
     },
